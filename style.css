@@ -1,0 +1,57 @@
+/* style.css - Tema Khusus Politeknik Gajah Tunggal */
+
+/* Import font modern dari Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Identitas Warna Poltek GT */
+    --primary-blue: #003366; /* Biru Dongker / Navy */
+    --accent-yellow: #FFB800; /* Kuning Emas */
+    --bg-light: #F4F7F6; /* Latar Belakang Terang */
+    
+    /* Variabel pendukung */
+    --dark-text: #212529;
+}
+
+body {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--dark-text);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* --- Komponen Kustom --- */
+
+.card-custom {
+    background-color: #ffffff;
+    border-radius: 15px;
+    border: none;
+    /* Soft shadow awal */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    /* Transisi halus */
+    transition: all 0.3s ease;
+}
+
+.card-custom:hover {
+    /* Efek melayang */
+    transform: translateY(-5px);
+    /* Shadow menebal */
+    box-shadow: 0 10px 25px rgba(0, 51, 102, 0.1);
+}
+
+.btn-poltek {
+    background-color: var(--primary-blue);
+    color: #ffffff;
+    border: none;
+    font-weight: 600;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px; /* Sudut sedikit membulat agar modern */
+    transition: all 0.3s ease;
+}
+
+.btn-poltek:hover, .btn-poltek:focus {
+    background-color: var(--accent-yellow);
+    color: var(--dark-text);
+    /* Sedikit efek shadow saat disentuh */
+    box-shadow: 0 4px 12px rgba(255, 184, 0, 0.3);
+}
