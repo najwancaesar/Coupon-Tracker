@@ -210,7 +210,7 @@ Buka browser dan akses:
 <table>
   <tr>
     <td align="center" width="50%">
-      <img src="assets/img/Phone.png" alt="Login Page" width="40%">
+      <img src="assets/img/Phone.png" alt="Login Page" width="28%">
       <br>
       <b>🔐 Halaman Login</b>
       <br>
@@ -226,7 +226,7 @@ Buka browser dan akses:
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="assets/img/Tablets.png" alt="Profile Page" width="45%">
+      <img src="assets/img/Tablets.png" alt="Profile Page" width="42%">
       <br>
       <b>👤 Halaman Profil</b>
       <br>
