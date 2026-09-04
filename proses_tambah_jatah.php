@@ -13,11 +13,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     // Menangkap data dari form POST
     $tanggal_input = $_POST['tanggal_input'];
-    $jumlah_kupon = $_POST['jumlah_kupon'];
+    $jumlah_kupon = (int)$_POST['jumlah_kupon']; // Cast ke integer untuk keamanan
     $tanggal_expired = $_POST['tanggal_expired'];
 
     // Mendapatkan tanggal hari ini
     $hari_ini = date('Y-m-d');
+
+    // Validasi 0: Jumlah kupon harus dalam rentang logis (1-31)
+    if ($jumlah_kupon < 1 || $jumlah_kupon > 31) {
+        $_SESSION['error'] = 'Jumlah kupon tidak logis! Jatah maksimal per bulan adalah 31 kupon.';
+        $_SESSION['pesan'] = 'Jumlah kupon tidak logis! Jatah maksimal per bulan adalah 31 kupon.';
+        $_SESSION['tipe_pesan'] = 'danger';
+
+        header("Location: dashboard.php");
+        exit();
+    }
 
     // Validasi 1: Tanggal input tidak boleh melebihi tanggal hari ini
     if ($tanggal_input > $hari_ini) {
@@ -44,11 +54,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Jika semua validasi lolos, lakukan eksekusi INSERT
-    $query = "INSERT INTO pemasukan_kupon (user_id, tanggal_input, jumlah_kupon, tanggal_expired) VALUES (?, ?, ?, ?)";
+    $query = "INSERT INTO pemasukan_kupon (user_id, tanggal_input, jumlah_kupon, sisa_kupon, tanggal_expired) VALUES (?, ?, ?, ?, ?)";
     $stmt = $mysqli->prepare($query);
     
     if ($stmt) {
-        $stmt->bind_param("isis", $user_id, $tanggal_input, $jumlah_kupon, $tanggal_expired);
+        // sisa_kupon diset sama dengan jumlah_kupon saat awal diinput (isiis)
+        $stmt->bind_param("isiis", $user_id, $tanggal_input, $jumlah_kupon, $jumlah_kupon, $tanggal_expired);
         
         if ($stmt->execute()) {
             $pesan_sukses = "Berhasil menambahkan $jumlah_kupon kupon. Kupon berlaku hingga " . date('d M Y', strtotime($tanggal_expired)) . ".";

@@ -11,36 +11,88 @@ if (!isset($_SESSION['user_id']) && !isset($_SESSION['id'])) {
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : $_SESSION['id'];
 $nama_lengkap = isset($_SESSION['nama_lengkap']) ? $_SESSION['nama_lengkap'] : 'User';
 
-// 1. Hitung Total Kupon Aktif
+// 1. Hitung Saldo Kupon Aktif & Sisa Kupon
 $total_aktif = 0;
-$query_aktif = "SELECT SUM(jumlah_kupon) as total FROM pemasukan_kupon WHERE user_id = ? AND tanggal_expired >= CURRENT_DATE()";
-$stmt = $mysqli->prepare($query_aktif);
+$sisa_kupon = 0;
+$query_saldo = "SELECT SUM(jumlah_kupon) as total_kupon, SUM(sisa_kupon) as total_sisa FROM pemasukan_kupon WHERE user_id = ? AND tanggal_expired >= CURRENT_DATE()";
+$stmt = $mysqli->prepare($query_saldo);
 if ($stmt) {
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($row = $result->fetch_assoc()) {
-        $total_aktif = $row['total'] ? $row['total'] : 0;
+        $total_aktif = $row['total_kupon'] ? $row['total_kupon'] : 0;
+        $sisa_kupon = $row['total_sisa'] ? $row['total_sisa'] : 0;
     }
     $stmt->close();
 }
 
-// 2. Hitung Total Kupon Terpakai
-$total_terpakai = 0;
-$query_pakai = "SELECT SUM(jumlah_pakai) as total FROM riwayat_kupon WHERE user_id = ?";
-$stmt = $mysqli->prepare($query_pakai);
+// 2. Hitung Total Kupon Terpakai (Bulan/Periode Berjalan)
+// Secara logis, terpakai = Jatah awal - Sisa bersih saat ini
+$total_terpakai = $total_aktif - $sisa_kupon;
+
+// --- START LOGIKA INSIGHT (TREN PEMAKAIAN) ---
+$bulan_ini = date('m');
+$tahun_ini = date('Y');
+
+// Penanganan pergantian tahun untuk bulan lalu
+if ($bulan_ini == 1) {
+    $bulan_lalu = 12;
+    $tahun_lalu = $tahun_ini - 1;
+} else {
+    $bulan_lalu = $bulan_ini - 1;
+    $tahun_lalu = $tahun_ini;
+}
+
+// 2A. Pemakaian Bulan Ini
+$pakai_bulan_ini = 0;
+$query_pakai_ini = "SELECT SUM(jumlah_pakai) as total FROM riwayat_kupon WHERE user_id = ? AND MONTH(tanggal_pakai) = ? AND YEAR(tanggal_pakai) = ?";
+$stmt = $mysqli->prepare($query_pakai_ini);
 if ($stmt) {
-    $stmt->bind_param("i", $user_id);
+    $stmt->bind_param("iii", $user_id, $bulan_ini, $tahun_ini);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($row = $result->fetch_assoc()) {
-        $total_terpakai = $row['total'] ? $row['total'] : 0;
+        $pakai_bulan_ini = $row['total'] ? $row['total'] : 0;
     }
     $stmt->close();
 }
 
-// 3. Hitung Sisa Kupon
-$sisa_kupon = $total_aktif - $total_terpakai;
+// 2B. Pemakaian Bulan Lalu
+$pakai_bulan_lalu = 0;
+$query_pakai_lalu = "SELECT SUM(jumlah_pakai) as total FROM riwayat_kupon WHERE user_id = ? AND MONTH(tanggal_pakai) = ? AND YEAR(tanggal_pakai) = ?";
+$stmt = $mysqli->prepare($query_pakai_lalu);
+if ($stmt) {
+    $stmt->bind_param("iii", $user_id, $bulan_lalu, $tahun_lalu);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        $pakai_bulan_lalu = $row['total'] ? $row['total'] : 0;
+    }
+    $stmt->close();
+}
+
+// 2C. Hitung Tren (Selisih)
+$selisih_pakai = $pakai_bulan_ini - $pakai_bulan_lalu;
+$teks_tren = "";
+$ikon_tren = "";
+$warna_tren = "";
+
+if ($selisih_pakai > 0) {
+    $teks_tren = "Naik $selisih_pakai kupon dari bulan lalu";
+    $ikon_tren = "fa-arrow-trend-up";
+    $warna_tren = "text-danger"; // Pemakaian meningkat
+} elseif ($selisih_pakai < 0) {
+    $selisih_positif = abs($selisih_pakai);
+    $teks_tren = "Turun $selisih_positif kupon dari bulan lalu";
+    $ikon_tren = "fa-arrow-trend-down";
+    $warna_tren = "text-success"; // Lebih hemat
+} else {
+    $teks_tren = "Sama persis dengan bulan lalu";
+    $ikon_tren = "fa-equals";
+    $warna_tren = "text-secondary";
+}
+// --- END LOGIKA INSIGHT ---
 
 // 4. Ambil Data Riwayat Pemasukan Kupon
 $riwayat_pemasukan = [];
@@ -113,7 +165,7 @@ if ($stmt) {
                     <li class="nav-item"><a class="nav-link active fw-semibold" href="dashboard.php"><i class="fa-solid fa-house"></i> Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="profile.php"><i class="fa-solid fa-user"></i> Profile</a></li>
                     <li class="nav-item ms-lg-2">
-                        <a class="nav-link text-danger bg-white px-3 rounded fw-semibold mt-2 mt-lg-0 btn-logout" href="logout.php">
+                        <a class="nav-link text-danger bg-white px-3 rounded fw-semibold mt-2 mt-lg-0" href="#" id="btn-logout">
                             <i class="fa-solid fa-right-from-bracket"></i> Logout
                         </a>
                     </li>
@@ -185,7 +237,7 @@ if ($stmt) {
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold text-muted">Jumlah Kupon</label>
-                                <input type="number" name="jumlah_kupon" class="form-control" placeholder="Contoh: 22" min="1" required>
+                                <input type="number" name="jumlah_kupon" class="form-control" placeholder="Contoh: 22" min="1" max="31" required>
                             </div>
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-muted">Tanggal Kedaluwarsa</label>
@@ -209,17 +261,51 @@ if ($stmt) {
                                 <label class="form-label fw-semibold text-muted">Tanggal Pakai</label>
                                 <input type="date" name="tanggal_pakai" class="form-control" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
                             </div>
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label class="form-label fw-semibold text-muted">Jumlah Pakai</label>
                                 <input type="number" name="jumlah_pakai" class="form-control" value="1" min="1" max="<?= ($sisa_kupon > 0) ? $sisa_kupon : 1 ?>" required>
                                 <?php if ($sisa_kupon <= 0): ?>
                                     <small class="text-danger mt-1 d-block"><i class="fa-solid fa-circle-exclamation"></i> Saldo habis, tidak bisa mencatat pemakaian.</small>
                                 <?php endif; ?>
                             </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold text-muted">Keterangan / Notes</label>
+                                <input type="text" name="keterangan" class="form-control" placeholder="Contoh: Makan siang, Beli es krim, dll" required>
+                            </div>
                             <button type="submit" class="btn btn-poltek w-100" <?= ($sisa_kupon <= 0) ? 'disabled' : '' ?>>
                                 <i class="fa-solid fa-check-circle"></i> Catat Pemakaian
                             </button>
                         </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2.5: Insight & Informasi -->
+        <div class="row mb-5">
+            <!-- Card Insight -->
+            <div class="col-12 col-md-6 mb-4 mb-md-0">
+                <div class="card card-custom h-100 p-2 border-start border-info border-5">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-muted fw-bold text-uppercase mb-0"><i class="fa-solid fa-chart-line me-2 text-info"></i> Insight Bulan Ini</h6>
+                        </div>
+                        <h2 class="fw-bold mb-1 text-dark"><?= $pakai_bulan_ini ?> <span class="fs-5 text-muted fw-normal">Kupon Dipakai</span></h2>
+                        <div class="d-flex align-items-center mt-3">
+                            <span class="<?= $warna_tren ?> fw-bold"><i class="fa-solid <?= $ikon_tren ?> me-1"></i> <?= $teks_tren ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Info FIFO -->
+            <div class="col-12 col-md-6">
+                <div class="card card-custom h-100 p-2" style="background-color: #fcf9f2; border-left: 5px solid var(--accent-yellow);">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-lightbulb text-warning me-2"></i> Informasi Kupon</h6>
+                        <p class="text-muted small mb-0 lh-lg">
+                            Pastikan untuk selalu mengecek masa aktif kupon. Kupon akan hangus secara otomatis <strong>2 bulan</strong> setelah tanggal didapatkan menggunakan sistem <strong>FIFO</strong> <em>(First In, First Out)</em>.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -282,6 +368,7 @@ if ($stmt) {
                                 <tr>
                                     <th class="px-3">Tgl Pakai</th>
                                     <th>Jumlah Dipakai</th>
+                                    <th>Keterangan</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -291,6 +378,7 @@ if ($stmt) {
                                         <tr>
                                             <td class="px-3"><?= date('d/m/Y', strtotime($rk['tanggal_pakai'])) ?></td>
                                             <td class="fw-bold text-danger">-<?= $rk['jumlah_pakai'] ?></td>
+                                            <td><?= htmlspecialchars($rk['keterangan'] ?? '-') ?></td>
                                             <td><span class="badge bg-success"><i class="fa-solid fa-check"></i> Tercatat</span></td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -323,6 +411,18 @@ if ($stmt) {
             origin: 'bottom', 
             interval: 100 
         });
+
+        // Pop-up Welcome (Muncul saat baru login)
+        <?php if (isset($_SESSION['welcome_alert'])): ?>
+            Swal.fire({ 
+                title: 'Selamat Datang!', 
+                text: 'Halo, selamat datang kembali di Sistem Kupon!', 
+                icon: 'success', 
+                timer: 2000, 
+                showConfirmButton: false 
+            });
+            <?php unset($_SESSION['welcome_alert']); ?>
+        <?php endif; ?>
 
         // SweetAlert2 Notifikasi (Pengganti Alert Bootstrap)
         <?php if (isset($_SESSION['sukses'])): ?>
@@ -361,6 +461,25 @@ if ($stmt) {
             });
             <?php unset($_SESSION['pesan'], $_SESSION['tipe_pesan']); ?>
         <?php endif; ?>
+
+        // Konfirmasi Logout
+        document.getElementById('btn-logout').addEventListener('click', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Yakin ingin logout?',
+                text: 'Sesi Anda akan diakhiri.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#003366',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Keluar!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'logout.php';
+                }
+            });
+        });
     </script>
 </body>
 </html>

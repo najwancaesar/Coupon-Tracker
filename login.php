@@ -11,27 +11,31 @@ if (isset($_SESSION['user_id']) || isset($_SESSION['id'])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
+    $nim = $_POST['nim'];
     $password = $_POST['password'];
 
-    // Menggunakan prepared statement
-    $stmt = $mysqli->prepare("SELECT * FROM users WHERE username = ?");
+    // Menggunakan prepared statement untuk keamanan dari SQL Injection
+    $stmt = $mysqli->prepare("SELECT * FROM users WHERE nim = ?");
     
     if ($stmt) {
-        $stmt->bind_param("s", $username);
+        $stmt->bind_param("s", $nim);
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
             $user = $result->fetch_assoc();
             
-            // Pengecekan password
+            // Pengecekan password hash
             if (password_verify($password, $user['password'])) {
                 $_SESSION['id'] = $user['id'];
                 $_SESSION['user_id'] = $user['id'];
+                $_SESSION['nim'] = $user['nim']; // Menyimpan NIM ke dalam session
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
                 $_SESSION['status_pekerjaan'] = $user['status_pekerjaan'];
+                
+                // Trigger pop-up welcome di dashboard
+                $_SESSION['welcome_alert'] = true;
                 
                 header("Location: index.php");
                 exit();
@@ -39,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $error = "Password yang Anda masukkan salah.";
             }
         } else {
-            $error = "Username tidak ditemukan di sistem.";
+            $error = "NIM tidak ditemukan di sistem.";
         }
         $stmt->close();
     } else {
@@ -129,10 +133,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <!-- Form -->
                 <form method="POST" action="">
                     <div class="mb-4">
-                        <label for="username" class="form-label text-secondary fw-bold small">USERNAME</label>
+                        <label for="nim" class="form-label text-secondary fw-bold small">NIM</label>
                         <div class="input-group py-1">
-                            <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
-                            <input type="text" class="form-control" id="username" name="username" placeholder="Ketik username Anda" required autofocus>
+                            <!-- Ganti ikon menjadi ID Card -->
+                            <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
+                            <input type="text" class="form-control" id="nim" name="nim" placeholder="Ketik NIM Anda" required autofocus>
                         </div>
                     </div>
                     
