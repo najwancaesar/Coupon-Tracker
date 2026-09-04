@@ -210,14 +210,14 @@ Buka browser dan akses:
 <table>
   <tr>
     <td align="center" width="50%">
-      <img src="assets/img/login_preview.png" alt="Login Page" width="100%">
+      <img src="assets/img/Phone.png" alt="Login Page" width="100%">
       <br>
       <b>🔐 Halaman Login</b>
       <br>
       <sub>Akses masuk aman menggunakan NIM & Password.</sub>
     </td>
     <td align="center" width="50%">
-      <img src="assets/img/dashboard_preview.png" alt="Dashboard Page" width="100%">
+      <img src="assets/img/Laptop.png" alt="Dashboard Page" width="100%">
       <br>
       <b>🖥️ Dashboard Desktop</b>
       <br>
@@ -226,18 +226,18 @@ Buka browser dan akses:
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="assets/img/profile_preview.png" alt="Profile Page" width="100%">
+      <img src="assets/img/Tablets.png" alt="Profile Page" width="100%">
       <br>
       <b>👤 Halaman Profil</b>
       <br>
       <sub>Manajemen profil diri dan ganti kata sandi.</sub>
     </td>
     <td align="center" width="50%">
-      <img src="assets/img/mobile_preview.png" alt="Mobile View" width="40%">
+      <img src="assets/img/Desktop.png" alt="Mobile View" width="40%">
       <br>
-      <b>📱 Dashboard Mobile</b>
+      <b>💻Dashboard With Desktop</b>
       <br>
-      <sub>Tampilan responsif, tetap rapi diakses lewat HP.</sub>
+      <sub>Tampilan responsif, tetap rapi diakses lewat Desktop.</sub>
     </td>
   </tr>
 </table>
