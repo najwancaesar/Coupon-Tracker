@@ -298,13 +298,15 @@ if ($stmt) {
                 </div>
             </div>
 
-            <!-- Card Info FIFO -->
+            <!-- Card Info FEFO -->
             <div class="col-12 col-md-6">
                 <div class="card card-custom h-100 p-2" style="background-color: #fcf9f2; border-left: 5px solid var(--accent-yellow);">
                     <div class="card-body">
                         <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-lightbulb text-warning me-2"></i> Informasi Kupon</h6>
                         <p class="text-muted small mb-0 lh-lg">
-                            Pastikan untuk selalu mengecek masa aktif kupon. Kupon akan hangus secara otomatis <strong>2 bulan</strong> setelah tanggal didapatkan menggunakan sistem <strong>FIFO</strong> <em>(First In, First Out)</em>.
+                            Pastikan untuk selalu mengecek masa aktif kupon. Kupon akan hangus secara otomatis <strong>2 bulan</strong> setelah tanggal didapatkan menggunakan sistem <strong>FEFO</strong> <em>(First Expired, First Out)</em>.
+                            <br><br>
+                            Sistem <strong>FEFO</strong> memastikan kupon yang masa kedaluwarsanya paling dekat akan diprioritaskan untuk dipotong lebih dulu saat Anda makan di kantin, sehingga tidak ada kupon yang terbuang sia-sia.
                         </p>
                     </div>
                 </div>
