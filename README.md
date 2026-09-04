@@ -210,7 +210,7 @@ Buka browser dan akses:
 <table>
   <tr>
     <td align="center" width="50%">
-      <img src="assets/img/Phone.png" alt="Login Page" width="100%">
+      <img src="assets/img/Phone.png" alt="Login Page" width="50%">
       <br>
       <b>🔐 Halaman Login</b>
       <br>
@@ -226,14 +226,14 @@ Buka browser dan akses:
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="assets/img/Tablets.png" alt="Profile Page" width="100%">
+      <img src="assets/img/Tablets.png" alt="Profile Page" width="50%">
       <br>
       <b>👤 Halaman Profil</b>
       <br>
       <sub>Manajemen profil diri dan ganti kata sandi.</sub>
     </td>
     <td align="center" width="50%">
-      <img src="assets/img/Desktop.png" alt="Mobile View" width="40%">
+      <img src="assets/img/Desktop.png" alt="Mobile View" width="100%">
       <br>
       <b>💻Dashboard With Desktop</b>
       <br>
