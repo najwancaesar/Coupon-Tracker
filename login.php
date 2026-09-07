@@ -6,7 +6,11 @@ $error = '';
 
 // Mencegah user login berulang kali masuk halaman ini
 if (isset($_SESSION['user_id']) || isset($_SESSION['id'])) {
-    header("Location: index.php");
+    if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+        header("Location: admin_dashboard.php");
+    } else {
+        header("Location: dashboard.php");
+    }
     exit();
 }
 
@@ -33,11 +37,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
                 $_SESSION['status_pekerjaan'] = $user['status_pekerjaan'];
+                $_SESSION['role'] = $user['role'];
                 
                 // Trigger pop-up welcome di dashboard
                 $_SESSION['welcome_alert'] = true;
                 
-                header("Location: index.php");
+                // Routing berdasarkan role
+                if ($user['role'] === 'admin') {
+                    header("Location: admin_dashboard.php");
+                } else {
+                    header("Location: dashboard.php");
+                }
                 exit();
             } else {
                 $error = "Password yang Anda masukkan salah.";
@@ -133,11 +143,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <!-- Form -->
                 <form method="POST" action="">
                     <div class="mb-4">
-                        <label for="nim" class="form-label text-secondary fw-bold small">NIM</label>
+                        <label for="nim" class="form-label text-secondary fw-bold small">NIM / USERNAME</label>
                         <div class="input-group py-1">
                             <!-- Ganti ikon menjadi ID Card -->
                             <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
-                            <input type="text" class="form-control" id="nim" name="nim" placeholder="Ketik NIM Anda" required autofocus>
+                            <input type="text" class="form-control" id="nim" name="nim" placeholder="Ketik NIM atau Username Admin" required autofocus>
                         </div>
                     </div>
                     
