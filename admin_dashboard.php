@@ -57,7 +57,7 @@ while($row = $query_all_users->fetch_assoc()) {
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link active fw-semibold" href="admin_dashboard.php"><i class="fa-solid fa-chart-line"></i> Dashboard Admin</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-desktop"></i> Monitoring Aktivitas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="admin_monitoring.php"><i class="fa-solid fa-desktop"></i> Monitoring Aktivitas</a></li>
                     <li class="nav-item"><a class="nav-link" href="profile.php"><i class="fa-solid fa-user"></i> Profile</a></li>
                     <li class="nav-item ms-lg-2">
                         <a class="nav-link text-danger bg-white px-3 rounded fw-semibold mt-2 mt-lg-0" href="#" id="btn-logout">

@@ -94,7 +94,7 @@ INSERT INTO `riwayat_kupon` (`id`, `user_id`, `tanggal_pakai`, `jumlah_pakai`, `
 	(1, 3, '2026-08-27', 1, 'Makan Siang'),
 	(2, 3, '2026-08-28', 1, 'Makan Siang'),
 	(3, 3, '2026-08-31', 1, 'Makan Siang'),
-	(4, 3, '2026-09-02', 1, 'Makan Siang');
+	(4, 3, '2026-09-02', 1, 'Makan Siang'); 
 
 -- Mengembalikan pengaturan default MySQL setelah import selesai[cite: 1]
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
