@@ -22,7 +22,7 @@ Aplikasi web interaktif untuk melacak, memonitor, dan memanajemen sisa kupon mak
 [🧩 Modul](#-modul-aplikasi) •
 [🛠️ Tech Stack](#️-tech-stack) •
 [📁 Struktur](#-struktur-folder) •
-[💡 Logika FIFO](#-logika-sistem-fifo) •
+[💡 Logika FEFO](#-logika-sistem-fefo) •
 [⚙️ Instalasi](#️-panduan-instalasi) •
 [🚀 Cara Pakai](#-cara-menggunakan) •
 [🗺️ Roadmap](#️-roadmap) •
@@ -36,7 +36,7 @@ Aplikasi web interaktif untuk melacak, memonitor, dan memanajemen sisa kupon mak
 
 **Sistem Manajemen Kupon Makan** adalah aplikasi yang bertindak sebagai **Dompet Digital Kupon** pribadi.
 
-Karena jatah kupon dari perusahaan dihitung berdasarkan hari kerja dan memiliki rentang masa kedaluwarsa, aplikasi ini dirancang untuk memastikan hak kupon bulanan Anda tidak ada yang hangus atau terlewat. Dilengkapi dengan logika *First-In, First-Out* (FIFO), analitik pemakaian bulanan, hingga proteksi sesi berbasis NIM.
+Karena jatah kupon dari perusahaan dihitung berdasarkan hari kerja dan memiliki rentang masa kedaluwarsa, aplikasi ini dirancang untuk memastikan hak kupon bulanan Anda tidak ada yang hangus atau terlewat. Dilengkapi dengan logika *First-Expired, First-Out* (FEFO), analitik pemakaian bulanan, hingga proteksi sesi berbasis NIM.
 
 > Didedikasikan khusus untuk penggunaan pribadi mahasiswa/karyawan selama masa pendidikan/kerja di **PT Gajah Tunggal Tbk**.
 
@@ -47,8 +47,8 @@ Karena jatah kupon dari perusahaan dihitung berdasarkan hari kerja dan memiliki 
 <table>
   <tr>
     <td width="33%">
-      <h3>💳 Saldo & Sistem FIFO</h3>
-      <p>Kalkulasi otomatis sisa kupon bersih. Pemakaian kupon otomatis memotong jatah kupon yang masa kedaluwarsanya paling dekat (First-In, First-Out).</p>
+      <h3>💳 Saldo & Sistem FEFO</h3>
+      <p>Kalkulasi otomatis sisa kupon bersih. Pemakaian kupon otomatis memotong jatah kupon yang masa kedaluwarsanya paling dekat (First-Expired, First-Out).</p>
     </td>
     <td width="33%">
       <h3>⏳ Smart Expiration</h3>
@@ -85,7 +85,7 @@ Karena jatah kupon dari perusahaan dihitung berdasarkan hari kerja dan memiliki 
 | 🏠 **Dashboard Utama** | Ringkasan saldo aktif, kupon terpakai bulan ini, insight tren pemakaian, dan tabel riwayat. |
 | 📥 **Input Pemasukan** | Penambahan jatah kupon bulanan dengan validasi *max date* hari ini dan kalkulasi *expired date*. |
 | 📤 **Catat Pemakaian** | Form pemakaian kupon dengan validasi saldo (mencegah minus) dan input keterangan/notes. |
-| ⚙️ **Mesin FIFO** | Algoritma *backend* yang melooping dan memotong saldo dari *batch* kupon terlama secara otomatis. |
+| ⚙️ **Mesin FEFO** | Algoritma *backend* yang melooping dan memotong saldo dari *batch* kupon yang paling cepat kedaluwarsa secara otomatis. |
 | 👤 **Profile User** | Menampilkan NIM, Nama, Status Pekerjaan, serta form terproteksi untuk Ganti Password. |
 
 ---
@@ -116,7 +116,7 @@ kupon-makan/
 ├── login.php                  # Antarmuka dan logika autentikasi NIM
 ├── dashboard.php               # Halaman utama aplikasi (Insights & Forms)
 ├── proses_tambah_jatah.php     # Backend penambahan kupon & kalkulasi masa aktif
-├── proses_pakai_kupon.php      # Masterpiece Backend: Algoritma FIFO & validasi saldo
+├── proses_pakai_kupon.php      # Masterpiece Backend: Algoritma FEFO & validasi saldo
 ├── profile.php                 # Halaman data diri & form ubah sandi
 ├── proses_edit_pass.php        # Backend validasi dan update password hash
 └── logout.php                  # Logika penghancuran sesi & SweetAlert
@@ -124,19 +124,19 @@ kupon-makan/
 
 ---
 
-## 💡 Logika Sistem FIFO
+## 💡 Logika Sistem FEFO
 
-Aplikasi ini menggunakan sistem **First-In, First-Out (FIFO)** untuk memastikan kupon tidak hangus sia-sia:
+Aplikasi ini menggunakan sistem **First-Expired, First-Out (FEFO)** untuk memastikan kupon tidak hangus sia-sia. Berbeda dengan FIFO yang memotong berdasarkan urutan masuk, FEFO memprioritaskan pemotongan pada *batch* kupon yang **paling dekat masa kedaluwarsanya**, terlepas dari kapan kupon tersebut diinput:
 
 > **Kasus:** Anda punya sisa 10 kupon dari bulan Agustus (*expired* 1 Okt). Lalu pada 1 September, Anda input jatah baru sebanyak 20 kupon (*expired* 1 Nov). Total saldo = **30**.
 >
 > **Eksekusi:** Pada tanggal 2 September Anda makan menggunakan 2 kupon.
 >
-> **Hasil Backend:** Sistem akan mencari kupon mana yang paling cepat kedaluwarsa, lalu memotong 2 kupon dari *batch* Agustus.
+> **Hasil Backend:** Sistem akan mencari kupon mana yang paling cepat kedaluwarsa, lalu memotong 2 kupon dari *batch* Agustus (karena *expired date*-nya lebih dekat, yaitu 1 Okt).
 > - Sisa kupon Agustus = **8**
 > - Sisa kupon September = **20**
 >
-> Jauh lebih aman dan akurat! ✅
+> Jauh lebih aman dan akurat, karena kupon yang hampir hangus akan selalu terpakai lebih dulu! ✅
 
 ---
 
@@ -235,7 +235,7 @@ Buka browser dan akses:
     <td align="center" width="50%">
       <img src="assets/img/Desktop.png" alt="Mobile View" width="100%">
       <br>
-      <b>💻Dashboard With Desktop</b>
+      <b>💻 Dashboard With Desktop</b>
       <br>
       <sub>Tampilan responsif, tetap rapi diakses lewat Desktop.</sub>
     </td>
