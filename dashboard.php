@@ -232,18 +232,30 @@ if ($stmt) {
                     <div class="card-body p-4">
                         <form action="proses_tambah_jatah.php" method="POST">
                             <div class="mb-3">
-                                <label class="form-label fw-semibold text-muted">Tanggal Input</label>
-                                <input type="date" name="tanggal_input" class="form-control" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
+                                <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-regular fa-calendar me-1"></i> Tanggal Input</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-calendar-day text-primary"></i></span>
+                                    <input type="date" name="tanggal_input" class="form-control border-start-0" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
+                                </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-semibold text-muted">Jumlah Kupon</label>
-                                <input type="number" name="jumlah_kupon" class="form-control" placeholder="Contoh: 22" min="1" max="31" required>
+                                <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-ticket me-1"></i> Jumlah Kupon</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-hashtag text-primary"></i></span>
+                                    <input type="number" name="jumlah_kupon" class="form-control border-start-0" placeholder="Contoh: 22" min="1" max="31" required>
+                                    <span class="input-group-text bg-white text-muted">kupon</span>
+                                </div>
                             </div>
                             <div class="mb-4">
-                                <label class="form-label fw-semibold text-muted">Tanggal Kedaluwarsa</label>
-                                <input type="date" name="tanggal_expired" class="form-control" value="<?= date('Y-m-t') ?>" required>
+                                <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-regular fa-clock me-1"></i> Tanggal Kedaluwarsa</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-calendar-xmark text-danger"></i></span>
+                                    <input type="date" name="tanggal_expired" class="form-control border-start-0" value="<?= date('Y-m-t') ?>" required>
+                                </div>
                             </div>
-                            <button type="submit" class="btn btn-poltek w-100"><i class="fa-solid fa-save"></i> Simpan Jatah</button>
+                            <button type="submit" class="btn btn-poltek w-100 py-3 rounded-pill shadow-sm">
+                                <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Jatah Kupon
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -258,22 +270,32 @@ if ($stmt) {
                     <div class="card-body p-4">
                         <form action="proses_pakai_kupon.php" method="POST">
                             <div class="mb-3">
-                                <label class="form-label fw-semibold text-muted">Tanggal Pakai</label>
-                                <input type="date" name="tanggal_pakai" class="form-control" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
+                                <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-regular fa-calendar me-1"></i> Tanggal Pakai</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-calendar-check text-warning"></i></span>
+                                    <input type="date" name="tanggal_pakai" class="form-control border-start-0" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
+                                </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-semibold text-muted">Jumlah Pakai</label>
-                                <input type="number" name="jumlah_pakai" class="form-control" value="1" min="1" max="<?= ($sisa_kupon > 0) ? $sisa_kupon : 1 ?>" required>
+                                <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-utensils me-1"></i> Jumlah Pakai</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-minus text-danger"></i></span>
+                                    <input type="number" name="jumlah_pakai" class="form-control border-start-0" value="1" min="1" max="<?= ($sisa_kupon > 0) ? $sisa_kupon : 1 ?>" required>
+                                    <span class="input-group-text bg-white text-muted">kupon</span>
+                                </div>
                                 <?php if ($sisa_kupon <= 0): ?>
                                     <small class="text-danger mt-1 d-block"><i class="fa-solid fa-circle-exclamation"></i> Saldo habis, tidak bisa mencatat pemakaian.</small>
                                 <?php endif; ?>
                             </div>
                             <div class="mb-4">
-                                <label class="form-label fw-semibold text-muted">Keterangan / Notes</label>
-                                <input type="text" name="keterangan" class="form-control" placeholder="Contoh: Makan siang, Beli es krim, dll" required>
+                                <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-pen me-1"></i> Keterangan / Notes</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-note-sticky text-warning"></i></span>
+                                    <input type="text" name="keterangan" class="form-control border-start-0" placeholder="Contoh: Makan siang, Beli es krim, dll" required>
+                                </div>
                             </div>
-                            <button type="submit" class="btn btn-poltek w-100" <?= ($sisa_kupon <= 0) ? 'disabled' : '' ?>>
-                                <i class="fa-solid fa-check-circle"></i> Catat Pemakaian
+                            <button type="submit" class="btn btn-poltek w-100 py-3 rounded-pill shadow-sm" <?= ($sisa_kupon <= 0) ? 'disabled' : '' ?>>
+                                <i class="fa-solid fa-check-circle me-1"></i> Catat Pemakaian
                             </button>
                         </form>
                     </div>
@@ -358,37 +380,52 @@ if ($stmt) {
                 </div>
             </div>
 
-            <!-- Tabel Pemakaian -->
+            <!-- Activity List Pemakaian -->
             <div class="col-12 col-lg-6 mb-4">
                 <div class="card card-custom h-100 p-0">
                     <div class="card-header bg-white fw-bold text-secondary py-3 border-bottom-0">
-                        <i class="fa-solid fa-list-check"></i> Riwayat Pemakaian
+                        <i class="fa-solid fa-list-check me-1"></i> Riwayat Pemakaian
+                        <span class="badge bg-warning text-dark ms-2 rounded-pill"><?= count($riwayat_pemakaian) ?></span>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover mb-0">
-                            <thead class="table-warning">
-                                <tr>
-                                    <th class="px-3">Tgl Pakai</th>
-                                    <th>Jumlah Dipakai</th>
-                                    <th>Keterangan</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (count($riwayat_pemakaian) > 0): ?>
-                                    <?php foreach ($riwayat_pemakaian as $rk): ?>
-                                        <tr>
-                                            <td class="px-3"><?= date('d/m/Y', strtotime($rk['tanggal_pakai'])) ?></td>
-                                            <td class="fw-bold text-danger">-<?= $rk['jumlah_pakai'] ?></td>
-                                            <td><?= htmlspecialchars($rk['keterangan'] ?? '-') ?></td>
-                                            <td><span class="badge bg-success"><i class="fa-solid fa-check"></i> Tercatat</span></td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <tr><td colspan="3" class="text-center py-4 text-muted">Belum ada riwayat.</td></tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
+                    <div class="card-body p-3">
+                        <?php if (count($riwayat_pemakaian) > 0): ?>
+                            <?php foreach ($riwayat_pemakaian as $rk): ?>
+                                <div class="card mb-2 shadow-sm border-0 border-start border-warning border-4 activity-item">
+                                    <div class="card-body py-2 px-3">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <!-- Ikon Bulat Kiri -->
+                                            <div class="flex-shrink-0">
+                                                <div style="width:42px;height:42px;border-radius:50%;background:var(--primary-blue);display:flex;align-items:center;justify-content:center;">
+                                                    <i class="fa-solid fa-utensils text-white"></i>
+                                                </div>
+                                            </div>
+                                            <!-- Keterangan & Tanggal Tengah -->
+                                            <div class="flex-grow-1 overflow-hidden">
+                                                <div class="fw-bold text-dark text-truncate"><?= htmlspecialchars($rk['keterangan'] ?? 'Pemakaian Kupon') ?></div>
+                                                <small class="text-muted">
+                                                    <i class="fa-regular fa-calendar me-1"></i>
+                                                    <?= date('d M Y', strtotime($rk['tanggal_pakai'])) ?>
+                                                </small>
+                                            </div>
+                                            <!-- Badge Kurang Kanan -->
+                                            <div class="flex-shrink-0 text-end">
+                                                <span class="badge bg-danger rounded-pill fs-6 px-3">
+                                                    -<?= $rk['jumlah_pakai'] ?>
+                                                </span>
+                                                <div class="mt-1">
+                                                    <small class="text-success fw-semibold"><i class="fa-solid fa-circle-check"></i> Tercatat</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-bowl-food fa-3x mb-3 opacity-25"></i>
+                                <p class="mb-0">Belum ada riwayat pemakaian.</p>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -406,12 +443,18 @@ if ($stmt) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
 
     <script>
-        // Animasi ScrollReveal untuk Class card-custom
+        // Animasi ScrollReveal untuk Card utama & Activity Items
         ScrollReveal().reveal('.card-custom', { 
             delay: 200, 
-            distance: '50px', 
+            distance: '40px', 
             origin: 'bottom', 
             interval: 100 
+        });
+        ScrollReveal().reveal('.activity-item', { 
+            delay: 100, 
+            distance: '30px', 
+            origin: 'left', 
+            interval: 80 
         });
 
         // Pop-up Welcome (Muncul saat baru login)
