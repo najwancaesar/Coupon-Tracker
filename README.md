@@ -180,7 +180,7 @@ Buka browser dan akses:
 | Field | Value |
 |---|---|
 | NIM | `2404023` |
-| Password | `123456` |
+| Password | `Sesuai NIM` |
 
 ---
 
