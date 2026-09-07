@@ -18,7 +18,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // 1. Validasi konfirmasi password
     if ($password_baru !== $konfirmasi_password_baru) {
         $_SESSION['error'] = 'Password baru dan konfirmasi password tidak cocok/sama!';
-        header("Location: profile.php");
+        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+            header("Location: admin_profile.php");
+        } else {
+            header("Location: profile.php");
+        }
         exit();
     }
 
@@ -66,11 +70,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Kembalikan user ke halaman profil beserta notifikasi (berhasil/gagal)
-    header("Location: profile.php");
+    if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+        header("Location: admin_profile.php");
+    } else {
+        header("Location: profile.php");
+    }
     exit();
 } else {
     // Tolak akses jika dibuka tanpa metode POST
-    header("Location: profile.php");
+    if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+        header("Location: admin_profile.php");
+    } else {
+        header("Location: profile.php");
+    }
     exit();
 }
 ?>

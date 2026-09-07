@@ -48,7 +48,7 @@ if ($result && $result->num_rows > 0) {
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link fw-semibold" href="admin_dashboard.php"><i class="fa-solid fa-chart-line"></i> Dashboard Admin</a></li>
                     <li class="nav-item"><a class="nav-link active fw-semibold" href="admin_monitoring.php"><i class="fa-solid fa-desktop"></i> Monitoring Aktivitas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="profile.php"><i class="fa-solid fa-user"></i> Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="admin_profile.php"><i class="fa-solid fa-user"></i> Profile</a></li>
                     <li class="nav-item ms-lg-2">
                         <a class="nav-link text-danger bg-white px-3 rounded fw-semibold mt-2 mt-lg-0" href="#" id="btn-logout">
                             <i class="fa-solid fa-right-from-bracket"></i> Logout

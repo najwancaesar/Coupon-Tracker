@@ -58,7 +58,7 @@ while($row = $query_all_users->fetch_assoc()) {
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link active fw-semibold" href="admin_dashboard.php"><i class="fa-solid fa-chart-line"></i> Dashboard Admin</a></li>
                     <li class="nav-item"><a class="nav-link" href="admin_monitoring.php"><i class="fa-solid fa-desktop"></i> Monitoring Aktivitas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="profile.php"><i class="fa-solid fa-user"></i> Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="admin_profile.php"><i class="fa-solid fa-user"></i> Profile</a></li>
                     <li class="nav-item ms-lg-2">
                         <a class="nav-link text-danger bg-white px-3 rounded fw-semibold mt-2 mt-lg-0" href="#" id="btn-logout">
                             <i class="fa-solid fa-right-from-bracket"></i> Logout
@@ -139,7 +139,7 @@ while($row = $query_all_users->fetch_assoc()) {
                                 <thead class="table-light">
                                     <tr>
                                         <th class="px-4">No</th>
-                                        <th>NIM</th>
+                                        <th>NIM / NIP</th>
                                         <th>Username</th>
                                         <th>Nama Lengkap</th>
                                         <th>Status Pekerjaan</th>
@@ -156,9 +156,9 @@ while($row = $query_all_users->fetch_assoc()) {
                                                 <td><?= htmlspecialchars($u['nama_lengkap']) ?></td>
                                                 <td>
                                                     <?php if($u['status_pekerjaan'] == 'Karyawan'): ?>
-                                                        <span class="badge bg-info text-dark"><i class="fa-solid fa-user-tie"></i> Karyawan</span>
+                                                        <span class="badge bg-primary"><i class="fa-solid fa-user-tie"></i> Karyawan</span>
                                                     <?php else: ?>
-                                                        <span class="badge bg-secondary"><i class="fa-solid fa-user-graduate"></i> Mahasiswa</span>
+                                                        <span class="badge bg-success"><i class="fa-solid fa-user-graduate"></i> Mahasiswa</span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td class="text-center">
@@ -206,8 +206,9 @@ while($row = $query_all_users->fetch_assoc()) {
                 <form action="proses_admin_user.php?aksi=tambah" method="POST">
                     <div class="modal-body p-4">
                         <div class="mb-3">
-                            <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-id-card me-1"></i> NIM/NIK</label>
-                            <input type="text" name="nim" class="form-control" placeholder="Masukkan NIM/NIK" required>
+                            <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-id-card me-1"></i> NIM / NIP</label>
+                            <input type="text" name="nim" class="form-control" placeholder="Masukkan NIM atau NIP" required>
+                            <small class="text-muted d-block mt-1">Gunakan NIM untuk Mahasiswa, atau NIP untuk Karyawan.</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-at me-1"></i> Username</label>
@@ -249,8 +250,9 @@ while($row = $query_all_users->fetch_assoc()) {
                     <input type="hidden" name="id" id="edit_id">
                     <div class="modal-body p-4">
                         <div class="mb-3">
-                            <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-id-card me-1"></i> NIM</label>
-                            <input type="text" name="nim" id="edit_nim" class="form-control" required>
+                            <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-id-card me-1"></i> NIM / NIP</label>
+                            <input type="text" name="nim" id="edit_nim" class="form-control" placeholder="Masukkan NIM atau NIP" required>
+                            <small class="text-muted d-block mt-1">Gunakan NIM untuk Mahasiswa, atau NIP untuk Karyawan.</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-at me-1"></i> Username</label>
