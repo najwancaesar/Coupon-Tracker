@@ -163,13 +163,19 @@ while($row = $query_all_users->fetch_assoc()) {
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="btn-group btn-group-sm shadow-sm" role="group">
-                                                        <button type="button" class="btn btn-outline-primary" title="Edit User">
+                                                        <button type="button" class="btn btn-outline-primary btn-edit" 
+                                                            data-id="<?= $u['id'] ?>" 
+                                                            data-nim="<?= htmlspecialchars($u['nim']) ?>" 
+                                                            data-username="<?= htmlspecialchars($u['username']) ?>" 
+                                                            data-nama="<?= htmlspecialchars($u['nama_lengkap']) ?>" 
+                                                            data-status="<?= htmlspecialchars($u['status_pekerjaan']) ?>" 
+                                                            title="Edit User">
                                                             <i class="fa-solid fa-pen-to-square"></i>
                                                         </button>
-                                                        <button type="button" class="btn btn-outline-warning" title="Reset Password">
+                                                        <button type="button" class="btn btn-outline-warning btn-reset-pass" data-href="proses_admin_user.php?aksi=reset_pass&id=<?= $u['id'] ?>&nim=<?= htmlspecialchars($u['nim']) ?>" title="Reset Password">
                                                             <i class="fa-solid fa-key"></i>
                                                         </button>
-                                                        <button type="button" class="btn btn-outline-danger" title="Hapus User">
+                                                        <button type="button" class="btn btn-outline-danger btn-hapus-user" data-href="proses_admin_user.php?aksi=hapus&id=<?= $u['id'] ?>" title="Hapus User">
                                                             <i class="fa-solid fa-trash"></i>
                                                         </button>
                                                     </div>
@@ -197,7 +203,7 @@ while($row = $query_all_users->fetch_assoc()) {
                     <h5 class="modal-title fw-bold" id="modalTambahUserLabel"><i class="fa-solid fa-user-plus me-2"></i>Tambah User Baru</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="#" method="POST">
+                <form action="proses_admin_user.php?aksi=tambah" method="POST">
                     <div class="modal-body p-4">
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-id-card me-1"></i> NIM</label>
@@ -225,6 +231,46 @@ while($row = $query_all_users->fetch_assoc()) {
                     <div class="modal-footer bg-light border-top-0">
                         <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-poltek rounded-pill px-4"><i class="fa-solid fa-save me-1"></i> Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit User -->
+    <div class="modal fade" id="modalEditUser" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-pen me-2"></i>Edit Pengguna</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="proses_admin_user.php?aksi=edit" method="POST">
+                    <input type="hidden" name="id" id="edit_id">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-id-card me-1"></i> NIM</label>
+                            <input type="text" name="nim" id="edit_nim" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-at me-1"></i> Username</label>
+                            <input type="text" name="username" id="edit_username" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-regular fa-id-badge me-1"></i> Nama Lengkap</label>
+                            <input type="text" name="nama_lengkap" id="edit_nama" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-briefcase me-1"></i> Status Pekerjaan</label>
+                            <select name="status_pekerjaan" id="edit_status" class="form-select" required>
+                                <option value="Mahasiswa">Mahasiswa</option>
+                                <option value="Karyawan">Karyawan</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-top-0">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-warning rounded-pill px-4"><i class="fa-solid fa-save me-1"></i> Update Data</button>
                     </div>
                 </form>
             </div>
@@ -260,6 +306,76 @@ while($row = $query_all_users->fetch_assoc()) {
             });
             <?php unset($_SESSION['welcome_alert']); ?>
         <?php endif; ?>
+
+        // Notifikasi Global Admin
+        <?php if (isset($_SESSION['sukses'])): ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '<?= addslashes($_SESSION['sukses']) ?>',
+                confirmButtonColor: 'var(--primary-blue)',
+                confirmButtonText: 'Oke'
+            });
+            <?php unset($_SESSION['sukses']); ?>
+        <?php elseif (isset($_SESSION['error'])): ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops!',
+                text: '<?= addslashes($_SESSION['error']) ?>',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Tutup'
+            });
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
+
+        // Open Modal Edit & Fill Data
+        const modalEdit = new bootstrap.Modal(document.getElementById('modalEditUser'));
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.getElementById('edit_id').value = this.getAttribute('data-id');
+                document.getElementById('edit_nim').value = this.getAttribute('data-nim');
+                document.getElementById('edit_username').value = this.getAttribute('data-username');
+                document.getElementById('edit_nama').value = this.getAttribute('data-nama');
+                document.getElementById('edit_status').value = this.getAttribute('data-status');
+                modalEdit.show();
+            });
+        });
+
+        // Reset Password Konfirmasi
+        document.querySelectorAll('.btn-reset-pass').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetUrl = this.getAttribute('data-href');
+                Swal.fire({
+                    title: 'Reset Kata Sandi?',
+                    text: 'Password akun ini akan dikembalikan menjadi sama dengan NIM-nya.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ffc107',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Reset Password!'
+                }).then((result) => {
+                    if(result.isConfirmed) window.location.href = targetUrl;
+                });
+            });
+        });
+
+        // Hapus Data Konfirmasi
+        document.querySelectorAll('.btn-hapus-user').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetUrl = this.getAttribute('data-href');
+                Swal.fire({
+                    title: 'Hapus User Permanen?',
+                    text: 'Perhatian! Semua data pemasukan & pemakaian kupon dari user ini akan ikut musnah dan tidak dapat dikembalikan!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Hapus Semua!'
+                }).then((result) => {
+                    if(result.isConfirmed) window.location.href = targetUrl;
+                });
+            });
+        });
 
         // Konfirmasi Logout yang Elegan (seperti di user dashboard)
         document.getElementById('btn-logout').addEventListener('click', function(e) {
