@@ -350,6 +350,7 @@ if ($stmt) {
                                     <th class="px-3">Tgl Input</th>
                                     <th>Jumlah</th>
                                     <th>Tgl Expired</th>
+                                    <th class="text-center">Hapus</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -369,10 +370,15 @@ if ($stmt) {
                                                 }
                                                 ?>
                                             </td>
+                                            <td class="text-center">
+                                                <a href="#" class="btn-hapus" data-href="proses_hapus.php?jenis=pemasukan&id=<?= $rp['id'] ?>">
+                                                    <i class="fa-solid fa-trash text-danger"></i>
+                                                </a>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
-                                    <tr><td colspan="3" class="text-center py-4 text-muted">Belum ada riwayat.</td></tr>
+                                    <tr><td colspan="4" class="text-center py-4 text-muted">Belum ada riwayat.</td></tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
@@ -407,13 +413,16 @@ if ($stmt) {
                                                     <?= date('d M Y', strtotime($rk['tanggal_pakai'])) ?>
                                                 </small>
                                             </div>
-                                            <!-- Badge Kurang Kanan -->
+                                            <!-- Badge & Hapus Kanan -->
                                             <div class="flex-shrink-0 text-end">
                                                 <span class="badge bg-danger rounded-pill fs-6 px-3">
                                                     -<?= $rk['jumlah_pakai'] ?>
                                                 </span>
-                                                <div class="mt-1">
+                                                <div class="mt-1 d-flex align-items-center justify-content-end gap-2">
                                                     <small class="text-success fw-semibold"><i class="fa-solid fa-circle-check"></i> Tercatat</small>
+                                                    <a href="#" class="btn-hapus" data-href="proses_hapus.php?jenis=pemakaian&id=<?= $rk['id'] ?>">
+                                                        <i class="fa-solid fa-trash text-danger"></i>
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
@@ -455,6 +464,28 @@ if ($stmt) {
             distance: '30px', 
             origin: 'left', 
             interval: 80 
+        });
+
+        // Konfirmasi Hapus Data (SweetAlert2)
+        document.querySelectorAll('.btn-hapus').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetUrl = this.getAttribute('data-href');
+                Swal.fire({
+                    title: 'Hapus Data?',
+                    text: 'Data ini akan dihapus permanen dan tidak bisa dikembalikan!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = targetUrl;
+                    }
+                });
+            });
         });
 
         // Pop-up Welcome (Muncul saat baru login)
