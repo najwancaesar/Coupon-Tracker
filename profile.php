@@ -255,7 +255,15 @@ if ($stmt) {
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = 'logout.php';
+                    Swal.fire({
+                        title: 'Terima Kasih!',
+                        text: 'Sampai jumpa kembali, jangan lupa makan teratur!',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = 'logout.php';
+                    });
                 }
             });
         });
