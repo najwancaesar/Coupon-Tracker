@@ -206,8 +206,8 @@ while($row = $query_all_users->fetch_assoc()) {
                 <form action="proses_admin_user.php?aksi=tambah" method="POST">
                     <div class="modal-body p-4">
                         <div class="mb-3">
-                            <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-id-card me-1"></i> NIM</label>
-                            <input type="text" name="nim" class="form-control" placeholder="Masukkan NIM" required>
+                            <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-id-card me-1"></i> NIM/NIK</label>
+                            <input type="text" name="nim" class="form-control" placeholder="Masukkan NIM/NIK" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-at me-1"></i> Username</label>
