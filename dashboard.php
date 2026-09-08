@@ -235,7 +235,7 @@ if ($stmt) {
                                 <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-regular fa-calendar me-1"></i> Tanggal Input</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-calendar-day text-primary"></i></span>
-                                    <input type="date" name="tanggal_input" class="form-control border-start-0" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
+                                    <input type="date" name="tanggal_input" class="form-control border-start-0" value="<?= date('Y-m-d') ?>" required>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -250,7 +250,7 @@ if ($stmt) {
                                 <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-regular fa-clock me-1"></i> Tanggal Kedaluwarsa</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-calendar-xmark text-danger"></i></span>
-                                    <input type="date" name="tanggal_expired" class="form-control border-start-0" value="<?= date('Y-m-t') ?>" required>
+                                    <input type="date" name="tanggal_expired" class="form-control border-start-0" value="<?php echo date('Y-m-d', strtotime('+2 months')); ?>" required>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-poltek w-100 py-3 rounded-pill shadow-sm">
@@ -273,7 +273,7 @@ if ($stmt) {
                                 <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-regular fa-calendar me-1"></i> Tanggal Pakai</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-calendar-check text-warning"></i></span>
-                                    <input type="date" name="tanggal_pakai" class="form-control border-start-0" value="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d') ?>" required>
+                                    <input type="date" name="tanggal_pakai" class="form-control border-start-0" value="<?= date('Y-m-d') ?>" required>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -287,11 +287,21 @@ if ($stmt) {
                                     <small class="text-danger mt-1 d-block"><i class="fa-solid fa-circle-exclamation"></i> Saldo habis, tidak bisa mencatat pemakaian.</small>
                                 <?php endif; ?>
                             </div>
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-pen me-1"></i> Keterangan / Notes</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-note-sticky text-warning"></i></span>
                                     <input type="text" name="keterangan" class="form-control border-start-0" placeholder="Contoh: Makan siang, Beli es krim, dll" required>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-regular fa-clock me-1"></i> Status</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"><i class="fa-regular fa-calendar-check text-warning"></i></span>
+                                    <select name="status" class="form-control border-start-0" required>
+                                        <option value="Selesai">Selesai</option>
+                                        <option value="Pending">Pending</option>
+                                    </select>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-poltek w-100 py-3 rounded-pill shadow-sm" <?= ($sisa_kupon <= 0) ? 'disabled' : '' ?>>
