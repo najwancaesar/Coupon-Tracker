@@ -1,6 +1,7 @@
 <?php
-session_start();
+require 'session_config.php';
 require 'koneksi.php';
+require 'csrf.php';
 
 // Proteksi halaman admin
 if (!isset($_SESSION['id']) || $_SESSION['role'] !== 'admin') {
@@ -172,12 +173,21 @@ while($row = $query_all_users->fetch_assoc()) {
                                                             title="Edit User">
                                                             <i class="fa-solid fa-pen-to-square"></i>
                                                         </button>
-                                                        <button type="button" class="btn btn-outline-warning btn-reset-pass" data-href="proses_admin_user.php?aksi=reset_pass&id=<?= $u['id'] ?>&nim=<?= htmlspecialchars($u['nim']) ?>" title="Reset Password">
-                                                            <i class="fa-solid fa-key"></i>
-                                                        </button>
-                                                        <button type="button" class="btn btn-outline-danger btn-hapus-user" data-href="proses_admin_user.php?aksi=hapus&id=<?= $u['id'] ?>" title="Hapus User">
-                                                            <i class="fa-solid fa-trash"></i>
-                                                        </button>
+                                                        <form method="POST" action="proses_admin_user.php?aksi=reset_pass" class="d-inline form-reset-pass" data-nama="<?= htmlspecialchars($u['nama_lengkap']) ?>">
+                                                            <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                                                            <input type="hidden" name="id" value="<?= $u['id'] ?>">
+                                                            <input type="hidden" name="nim" value="<?= htmlspecialchars($u['nim']) ?>">
+                                                            <button type="submit" class="btn btn-outline-warning" title="Reset Password">
+                                                                <i class="fa-solid fa-key"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form method="POST" action="proses_admin_user.php?aksi=hapus" class="d-inline form-hapus-user" data-nama="<?= htmlspecialchars($u['nama_lengkap']) ?>">
+                                                            <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                                                            <input type="hidden" name="id" value="<?= $u['id'] ?>">
+                                                            <button type="submit" class="btn btn-outline-danger" title="Hapus User">
+                                                                <i class="fa-solid fa-trash"></i>
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -205,6 +215,7 @@ while($row = $query_all_users->fetch_assoc()) {
                 </div>
                 <form action="proses_admin_user.php?aksi=tambah" method="POST">
                     <div class="modal-body p-4">
+                        <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-solid fa-id-card me-1"></i> NIM / NIP</label>
                             <input type="text" name="nim" class="form-control" placeholder="Masukkan NIM atau NIP" required>
@@ -247,6 +258,7 @@ while($row = $query_all_users->fetch_assoc()) {
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="proses_admin_user.php?aksi=edit" method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
                     <input type="hidden" name="id" id="edit_id">
                     <div class="modal-body p-4">
                         <div class="mb-3">
@@ -343,38 +355,65 @@ while($row = $query_all_users->fetch_assoc()) {
             });
         });
 
-        // Reset Password Konfirmasi
-        document.querySelectorAll('.btn-reset-pass').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const targetUrl = this.getAttribute('data-href');
+        // --- Notifikasi wajib ganti password (must_change_password) ---
+        <?php if (!empty($_SESSION['must_change_password'])): ?>
+            Swal.fire({
+                icon: 'warning',
+                title: 'Ganti Password Sekarang!',
+                html: 'Demi keamanan akun Administrator Anda, silakan <strong>ganti password default</strong> Anda terlebih dahulu.',
+                confirmButtonColor: 'var(--primary-blue)',
+                confirmButtonText: 'Ganti Password Sekarang',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'admin_profile.php';
+                }
+            });
+        <?php endif; ?>
+
+        // Reset Password Konfirmasi (POST Form + CSRF)
+        document.querySelectorAll('.form-reset-pass').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const nama = this.getAttribute('data-nama') || 'pengguna ini';
+                const submittedForm = this;
                 Swal.fire({
                     title: 'Reset Kata Sandi?',
-                    text: 'Password akun ini akan dikembalikan menjadi sama dengan NIM-nya.',
+                    text: `Password akun "${nama}" akan di-reset menjadi sama dengan NIM-nya.`,
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#ffc107',
                     cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Ya, Reset Password!'
+                    confirmButtonText: 'Ya, Reset Password!',
+                    cancelButtonText: 'Batal'
                 }).then((result) => {
-                    if(result.isConfirmed) window.location.href = targetUrl;
+                    if (result.isConfirmed) {
+                        submittedForm.submit();
+                    }
                 });
             });
         });
 
-        // Hapus Data Konfirmasi
-        document.querySelectorAll('.btn-hapus-user').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const targetUrl = this.getAttribute('data-href');
+        // Hapus User Konfirmasi (POST Form + CSRF)
+        document.querySelectorAll('.form-hapus-user').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const nama = this.getAttribute('data-nama') || 'pengguna ini';
+                const submittedForm = this;
                 Swal.fire({
                     title: 'Hapus User Permanen?',
-                    text: 'Perhatian! Semua data pemasukan & pemakaian kupon dari user ini akan ikut musnah dan tidak dapat dikembalikan!',
+                    text: `Perhatian! User "${nama}" beserta semua data pemasukan & pemakaian kuponnya akan dihapus permanen!`,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Ya, Hapus Semua!'
+                    confirmButtonText: 'Ya, Hapus Semua!',
+                    cancelButtonText: 'Batal'
                 }).then((result) => {
-                    if(result.isConfirmed) window.location.href = targetUrl;
+                    if (result.isConfirmed) {
+                        submittedForm.submit();
+                    }
                 });
             });
         });

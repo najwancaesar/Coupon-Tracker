@@ -1,5 +1,5 @@
 <?php
-session_start();
+require 'session_config.php';
 require 'koneksi.php';
 
 // Proteksi halaman admin

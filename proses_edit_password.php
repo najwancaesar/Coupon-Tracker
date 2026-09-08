@@ -1,6 +1,7 @@
 <?php
-session_start();
+require 'session_config.php';
 require 'koneksi.php';
+require 'csrf.php';
 
 // Proteksi sesi (Wajib login)
 if (!isset($_SESSION['user_id']) && !isset($_SESSION['id'])) {
@@ -11,13 +12,10 @@ if (!isset($_SESSION['user_id']) && !isset($_SESSION['id'])) {
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : $_SESSION['id'];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $password_lama = $_POST['password_lama'];
-    $password_baru = $_POST['password_baru'];
-    $konfirmasi_password_baru = $_POST['konfirmasi_password_baru'];
 
-    // 1. Validasi konfirmasi password
-    if ($password_baru !== $konfirmasi_password_baru) {
-        $_SESSION['error'] = 'Password baru dan konfirmasi password tidak cocok/sama!';
+    // --- Verifikasi CSRF Token ---
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        $_SESSION['error'] = 'Permintaan tidak valid (token keamanan salah). Silakan coba lagi.';
         if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
             header("Location: admin_profile.php");
         } else {
@@ -25,41 +23,68 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         exit();
     }
+
+    $password_lama             = $_POST['password_lama'] ?? '';
+    $password_baru             = $_POST['password_baru'] ?? '';
+    $konfirmasi_password_baru  = $_POST['konfirmasi_password_baru'] ?? '';
+
+    // Helper redirect ke halaman profil yang sesuai
+    $redirect_profile = (isset($_SESSION['role']) && $_SESSION['role'] === 'admin')
+        ? 'admin_profile.php'
+        : 'profile.php';
+
+    // 1. Validasi konfirmasi password
+    if ($password_baru !== $konfirmasi_password_baru) {
+        $_SESSION['error'] = 'Password baru dan konfirmasi password tidak cocok/sama!';
+        header("Location: $redirect_profile");
+        exit();
+    }
+
     // 1.5. Validasi password baru tidak boleh sama dengan password lama
     if ($password_lama === $password_baru) {
         $_SESSION['error'] = 'Password baru tidak boleh sama dengan password lama! Silakan gunakan password yang berbeda untuk keamanan.';
-        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
-            header("Location: admin_profile.php");
-        } else {
-            header("Location: profile.php");
-        }
+        header("Location: $redirect_profile");
+        exit();
+    }
+
+    // 1.6. Validasi kebijakan password: minimal 8 karakter, mengandung huruf dan angka
+    if (strlen($password_baru) < 8) {
+        $_SESSION['error'] = 'Password baru minimal harus 8 karakter!';
+        header("Location: $redirect_profile");
+        exit();
+    }
+    if (!preg_match('/[a-zA-Z]/', $password_baru) || !preg_match('/[0-9]/', $password_baru)) {
+        $_SESSION['error'] = 'Password baru harus mengandung minimal 1 huruf dan 1 angka!';
+        header("Location: $redirect_profile");
         exit();
     }
 
     // 2. Tarik password lama user (yang dienkripsi) dari database
     $query = "SELECT password FROM users WHERE id = ?";
-    $stmt = $mysqli->prepare($query);
-    
+    $stmt  = $mysqli->prepare($query);
+
     if ($stmt) {
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         if ($user = $result->fetch_assoc()) {
-            
+
             // 3. Verifikasi apakah password lama yang diinput cocok dengan database
             if (password_verify($password_lama, $user['password'])) {
-                
+
                 // 4. Jika cocok, hash (enkripsi) password baru
                 $hash_baru = password_hash($password_baru, PASSWORD_DEFAULT);
-                
-                // 5. UPDATE data di tabel users
-                $query_update = "UPDATE users SET password = ? WHERE id = ?";
-                $stmt_upd = $mysqli->prepare($query_update);
+
+                // 5. UPDATE data di tabel users + set must_change_password = 0
+                $query_update  = "UPDATE users SET password = ?, must_change_password = 0 WHERE id = ?";
+                $stmt_upd      = $mysqli->prepare($query_update);
                 if ($stmt_upd) {
                     $stmt_upd->bind_param("si", $hash_baru, $user_id);
                     if ($stmt_upd->execute()) {
                         $_SESSION['sukses'] = 'Password Anda berhasil diperbarui!';
+                        // Update flag di session agar notif wajib ganti hilang
+                        $_SESSION['must_change_password'] = 0;
                     } else {
                         $_SESSION['error'] = 'Gagal menyimpan password baru ke database.';
                     }
@@ -67,7 +92,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 } else {
                     $_SESSION['error'] = 'Kesalahan saat menyiapkan kueri update.';
                 }
-                
+
             } else {
                 $_SESSION['error'] = 'Password lama yang Anda masukkan salah!';
             }
@@ -80,11 +105,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Kembalikan user ke halaman profil beserta notifikasi (berhasil/gagal)
-    if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
-        header("Location: admin_profile.php");
-    } else {
-        header("Location: profile.php");
-    }
+    header("Location: $redirect_profile");
     exit();
 } else {
     // Tolak akses jika dibuka tanpa metode POST

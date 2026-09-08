@@ -1,6 +1,7 @@
 <?php
-session_start();
+require 'session_config.php';
 require 'koneksi.php';
+require 'csrf.php';
 
 // Cek session untuk memastikan user sudah login
 if (!isset($_SESSION['user_id']) && !isset($_SESSION['id'])) {
@@ -9,11 +10,19 @@ if (!isset($_SESSION['user_id']) && !isset($_SESSION['id'])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : $_SESSION['id'];
-    $tanggal_pakai = $_POST['tanggal_pakai'];
-    $jumlah_pakai = (int)$_POST['jumlah_pakai'];
-    $keterangan = $_POST['keterangan'];
-    $status = $_POST['status'];
+
+    // --- Verifikasi CSRF Token ---
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        $_SESSION['error'] = 'Permintaan tidak valid (token keamanan salah). Silakan coba lagi.';
+        header("Location: dashboard.php");
+        exit();
+    }
+
+    $user_id       = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : $_SESSION['id'];
+    $tanggal_pakai = $_POST['tanggal_pakai'] ?? '';
+    $jumlah_pakai  = (int)($_POST['jumlah_pakai'] ?? 0);
+    $keterangan    = $_POST['keterangan'] ?? '';
+    $status        = $_POST['status'] ?? 'Selesai';
 
     // 1. Cek Ketersediaan Sisa Kupon yang Belum Expired
     $total_sisa_kupon = 0;

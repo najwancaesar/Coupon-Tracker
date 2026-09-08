@@ -1,6 +1,7 @@
 <?php
-session_start();
+require 'session_config.php';
 require 'koneksi.php';
+require 'csrf.php';
 
 // Pastikan user sudah login
 if (!isset($_SESSION['user_id']) && !isset($_SESSION['id'])) {
@@ -178,6 +179,7 @@ if ($stmt) {
                         <h5 class="fw-bold mb-4" style="color: var(--primary-blue);"><i class="fa-solid fa-lock me-2"></i> Ganti Password</h5>
                         
                         <form action="proses_edit_password.php" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-secondary small">PASSWORD LAMA</label>
                                 <div class="input-group">

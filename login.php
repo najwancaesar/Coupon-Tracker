@@ -1,10 +1,11 @@
 <?php
-session_start();
+require 'session_config.php';
 require 'koneksi.php';
+require 'csrf.php';
 
 $error = '';
 
-// Mencegah user login berulang kali masuk halaman ini
+// Mencegah user yang sudah login masuk halaman ini lagi
 if (isset($_SESSION['user_id']) || isset($_SESSION['id'])) {
     if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
         header("Location: admin_dashboard.php");
@@ -14,50 +15,85 @@ if (isset($_SESSION['user_id']) || isset($_SESSION['id'])) {
     exit();
 }
 
+// --- Bersihkan log attempt lama (lebih dari 1 jam) setiap kali halaman ini dibuka ---
+$mysqli->query("DELETE FROM login_attempts WHERE waktu < NOW() - INTERVAL 1 HOUR");
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nim = $_POST['nim'];
-    $password = $_POST['password'];
+    $nim      = trim($_POST['nim'] ?? '');
+    $password = $_POST['password'] ?? '';
 
-    // Menggunakan prepared statement untuk keamanan dari SQL Injection
-    $stmt = $mysqli->prepare("SELECT * FROM users WHERE nim = ?");
-    
-    if ($stmt) {
-        $stmt->bind_param("s", $nim);
-        $stmt->execute();
-        $result = $stmt->get_result();
+    // --- 1.5. Rate Limiting: Cek menggunakan identifier gabungan NIM + IP ---
+    // Ini mencegah brute-force dari 1 perangkat terhadap banyak NIM berbeda
+    $ip          = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $identifier  = hash('sha256', $nim . '|' . $ip); // Hash gabungan agar tidak simpan PII mentah
+    $window_menit = 15;
+    $max_attempt  = 5;
 
-        if ($result->num_rows > 0) {
-            $user = $result->fetch_assoc();
-            
-            // Pengecekan password hash
-            if (password_verify($password, $user['password'])) {
-                $_SESSION['id'] = $user['id'];
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['nim'] = $user['nim']; // Menyimpan NIM ke dalam session
-                $_SESSION['username'] = $user['username'];
-                $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
-                $_SESSION['status_pekerjaan'] = $user['status_pekerjaan'];
-                $_SESSION['role'] = $user['role'];
-                
-                // Trigger pop-up welcome di dashboard
-                $_SESSION['welcome_alert'] = true;
-                
-                // Routing berdasarkan role
-                if ($user['role'] === 'admin') {
-                    header("Location: admin_dashboard.php");
-                } else {
-                    header("Location: dashboard.php");
-                }
-                exit();
-            } else {
-                $error = "Password yang Anda masukkan salah.";
-            }
-        } else {
-            $error = "NIM tidak ditemukan di sistem.";
-        }
-        $stmt->close();
+    $stmt_rate = $mysqli->prepare(
+        "SELECT COUNT(*) as jumlah FROM login_attempts 
+         WHERE identifier = ? AND waktu >= NOW() - INTERVAL ? MINUTE"
+    );
+    $stmt_rate->bind_param("si", $identifier, $window_menit);
+    $stmt_rate->execute();
+    $rate_result   = $stmt_rate->get_result()->fetch_assoc();
+    $jumlah_attempt = (int)($rate_result['jumlah'] ?? 0);
+    $stmt_rate->close();
+
+    if ($jumlah_attempt >= $max_attempt) {
+        $error = "Terlalu banyak percobaan gagal. Silakan coba lagi dalam beberapa menit.";
     } else {
-        $error = "Terjadi kesalahan koneksi database.";
+        // --- Proses login normal ---
+        $stmt = $mysqli->prepare("SELECT * FROM users WHERE nim = ?");
+
+        if ($stmt) {
+            $stmt->bind_param("s", $nim);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows > 0) {
+                $user = $result->fetch_assoc();
+
+                if (password_verify($password, $user['password'])) {
+                    // Login sukses — cegah session fixation
+                    session_regenerate_id(true);
+
+                    $_SESSION['id']               = $user['id'];
+                    $_SESSION['user_id']          = $user['id'];
+                    $_SESSION['nim']              = $user['nim'];
+                    $_SESSION['username']         = $user['username'];
+                    $_SESSION['nama_lengkap']     = $user['nama_lengkap'];
+                    $_SESSION['status_pekerjaan'] = $user['status_pekerjaan'];
+                    $_SESSION['role']             = $user['role'];
+                    $_SESSION['must_change_password'] = (int)$user['must_change_password'];
+                    $_SESSION['welcome_alert']    = true;
+
+                    // Routing berdasarkan role
+                    if ($user['role'] === 'admin') {
+                        header("Location: admin_dashboard.php");
+                    } else {
+                        header("Location: dashboard.php");
+                    }
+                    exit();
+                } else {
+                    $error = "Password yang Anda masukkan salah.";
+                    // Catat percobaan gagal
+                    $stmt_log = $mysqli->prepare("INSERT INTO login_attempts (identifier, waktu) VALUES (?, NOW())");
+                    $stmt_log->bind_param("s", $identifier);
+                    $stmt_log->execute();
+                    $stmt_log->close();
+                }
+            } else {
+                $error = "NIM tidak ditemukan di sistem.";
+                // Catat percobaan gagal
+                $stmt_log = $mysqli->prepare("INSERT INTO login_attempts (identifier, waktu) VALUES (?, NOW())");
+                $stmt_log->bind_param("s", $identifier);
+                $stmt_log->execute();
+                $stmt_log->close();
+            }
+            $stmt->close();
+        } else {
+            $error = "Terjadi kesalahan koneksi database.";
+        }
     }
 }
 ?>
@@ -145,7 +181,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="mb-4">
                         <label for="nim" class="form-label text-secondary fw-bold small">NIM / USERNAME</label>
                         <div class="input-group py-1">
-                            <!-- Ganti ikon menjadi ID Card -->
                             <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
                             <input type="text" class="form-control" id="nim" name="nim" placeholder="Ketik NIM atau Username Admin" required autofocus>
                         </div>
@@ -172,7 +207,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
 
     <script>
-        // Cek jika variabel $error dari PHP memiliki isi teks
         <?php if (!empty($error)): ?>
             Swal.fire({
                 icon: 'error',

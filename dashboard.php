@@ -1,6 +1,7 @@
 <?php
-session_start();
+require 'session_config.php';
 require 'koneksi.php';
+require 'csrf.php';
 
 // Cek session login, proteksi akses
 if (!isset($_SESSION['user_id']) && !isset($_SESSION['id'])) {
@@ -231,6 +232,7 @@ if ($stmt) {
                     </div>
                     <div class="card-body p-4">
                         <form action="proses_tambah_jatah.php" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-regular fa-calendar me-1"></i> Tanggal Input</label>
                                 <div class="input-group">
@@ -269,6 +271,7 @@ if ($stmt) {
                     </div>
                     <div class="card-body p-4">
                         <form action="proses_pakai_kupon.php" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold text-muted small text-uppercase"><i class="fa-regular fa-calendar me-1"></i> Tanggal Pakai</label>
                                 <div class="input-group">
@@ -381,9 +384,14 @@ if ($stmt) {
                                                 ?>
                                             </td>
                                             <td class="text-center">
-                                                <a href="#" class="btn-hapus" data-href="proses_hapus.php?jenis=pemasukan&id=<?= $rp['id'] ?>">
-                                                    <i class="fa-solid fa-trash text-danger"></i>
-                                                </a>
+                                                <form method="POST" action="proses_hapus.php" class="d-inline form-hapus-pemasukan" data-confirm="Yakin ingin menghapus data pemasukan ini?">
+                                                    <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                                                    <input type="hidden" name="jenis" value="pemasukan">
+                                                    <input type="hidden" name="id" value="<?= $rp['id'] ?>">
+                                                    <button type="submit" class="btn btn-link p-0 border-0" title="Hapus">
+                                                        <i class="fa-solid fa-trash text-danger"></i>
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -436,13 +444,22 @@ if ($stmt) {
                                                 </span>
                                                 <div class="mt-2 d-flex align-items-center justify-content-end gap-3">
                                                     <?php if($rk['status'] === 'Pending'): ?>
-                                                        <a href="proses_selesai.php?id=<?= $rk['id'] ?>" title="Tandai Selesai" class="text-success fs-5">
-                                                            <i class="fa-solid fa-check-circle"></i>
-                                                        </a>
+                                                        <form method="POST" action="proses_selesai.php" class="d-inline form-selesai" data-confirm="Tandai kupon ini sebagai Selesai?">
+                                                            <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                                                            <input type="hidden" name="id" value="<?= $rk['id'] ?>">
+                                                            <button type="submit" class="btn btn-link p-0 border-0 text-success fs-5" title="Tandai Selesai">
+                                                                <i class="fa-solid fa-check-circle"></i>
+                                                            </button>
+                                                        </form>
                                                     <?php endif; ?>
-                                                    <a href="#" class="btn-hapus text-danger fs-5" data-href="proses_hapus.php?jenis=pemakaian&id=<?= $rk['id'] ?>" title="Hapus">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </a>
+                                                    <form method="POST" action="proses_hapus.php" class="d-inline form-hapus-pemakaian" data-confirm="Yakin ingin menghapus riwayat pemakaian ini? Saldo kupon akan dikembalikan.">
+                                                        <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                                                        <input type="hidden" name="jenis" value="pemakaian">
+                                                        <input type="hidden" name="id" value="<?= $rk['id'] ?>">
+                                                        <button type="submit" class="btn btn-link p-0 border-0 text-danger fs-5" title="Hapus">
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </div>
@@ -486,23 +503,26 @@ if ($stmt) {
             interval: 80 
         });
 
-        // Konfirmasi Hapus Data (SweetAlert2)
-        document.querySelectorAll('.btn-hapus').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
+        // Handler konfirmasi untuk semua form aksi (POST-based, CSRF-protected)
+        // Form hapus pemasukan
+        document.querySelectorAll('.form-hapus-pemasukan, .form-hapus-pemakaian, .form-selesai').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                const targetUrl = this.getAttribute('data-href');
+                const confirmMsg = this.getAttribute('data-confirm') || 'Yakin melanjutkan aksi ini?';
+                const isHapus = this.classList.contains('form-hapus-pemasukan') || this.classList.contains('form-hapus-pemakaian');
+                const submittedForm = this;
                 Swal.fire({
-                    title: 'Hapus Data?',
-                    text: 'Data ini akan dihapus permanen dan tidak bisa dikembalikan!',
+                    title: isHapus ? 'Hapus Data?' : 'Konfirmasi',
+                    text: confirmMsg,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#d33',
+                    confirmButtonColor: isHapus ? '#d33' : '#198754',
                     cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Ya, Hapus!',
+                    confirmButtonText: isHapus ? 'Ya, Hapus!' : 'Ya, Lanjutkan!',
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = targetUrl;
+                        submittedForm.submit();
                     }
                 });
             });
@@ -520,6 +540,23 @@ if ($stmt) {
             <?php unset($_SESSION['welcome_alert']); ?>
         <?php endif; ?>
 
+        // --- Notifikasi wajib ganti password (must_change_password) ---
+        <?php if (!empty($_SESSION['must_change_password'])): ?>
+            Swal.fire({
+                icon: 'warning',
+                title: 'Ganti Password Sekarang!',
+                html: 'Demi keamanan akun Anda, silakan <strong>ganti password default</strong> Anda sebelum menggunakan aplikasi.',
+                confirmButtonColor: 'var(--primary-blue)',
+                confirmButtonText: 'Ganti Password Sekarang',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'profile.php';
+                }
+            });
+        <?php endif; ?>
+
         // SweetAlert2 Notifikasi (Pengganti Alert Bootstrap)
         <?php if (isset($_SESSION['sukses'])): ?>
             Swal.fire({
@@ -531,7 +568,7 @@ if ($stmt) {
             });
             <?php 
                 unset($_SESSION['sukses']); 
-                unset($_SESSION['pesan']); // Clear fallback
+                unset($_SESSION['pesan']);
                 unset($_SESSION['tipe_pesan']); 
             ?>
         <?php elseif (isset($_SESSION['error'])): ?>
@@ -544,7 +581,7 @@ if ($stmt) {
             });
             <?php 
                 unset($_SESSION['error']); 
-                unset($_SESSION['pesan']); // Clear fallback
+                unset($_SESSION['pesan']);
                 unset($_SESSION['tipe_pesan']); 
             ?>
         <?php elseif (isset($_SESSION['pesan'])): ?>
