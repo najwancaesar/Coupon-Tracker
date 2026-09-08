@@ -406,7 +406,8 @@ if ($stmt) {
                     <div class="card-body p-3">
                         <?php if (count($riwayat_pemakaian) > 0): ?>
                             <?php foreach ($riwayat_pemakaian as $rk): ?>
-                                <div class="card mb-2 shadow-sm border-0 border-start border-warning border-4 activity-item">
+                                <?php $border_class = ($rk['status'] === 'Pending') ? 'border-secondary' : 'border-warning'; ?>
+                                <div class="card mb-2 shadow-sm border-0 border-start <?= $border_class ?> border-4 activity-item">
                                     <div class="card-body py-2 px-3">
                                         <div class="d-flex align-items-center gap-3">
                                             <!-- Ikon Bulat Kiri -->
@@ -418,20 +419,29 @@ if ($stmt) {
                                             <!-- Keterangan & Tanggal Tengah -->
                                             <div class="flex-grow-1 overflow-hidden">
                                                 <div class="fw-bold text-dark text-truncate"><?= htmlspecialchars($rk['keterangan'] ?? 'Pemakaian Kupon') ?></div>
-                                                <small class="text-muted">
+                                                <small class="text-muted d-block mt-1">
                                                     <i class="fa-regular fa-calendar me-1"></i>
                                                     <?= date('d M Y', strtotime($rk['tanggal_pakai'])) ?>
+                                                    <?php if($rk['status'] === 'Pending'): ?>
+                                                        <span class="badge bg-warning text-dark ms-2 shadow-sm">⏳ Pending</span>
+                                                    <?php else: ?>
+                                                        <span class="badge bg-success ms-2 shadow-sm">✅ Selesai</span>
+                                                    <?php endif; ?>
                                                 </small>
                                             </div>
                                             <!-- Badge & Hapus Kanan -->
                                             <div class="flex-shrink-0 text-end">
-                                                <span class="badge bg-danger rounded-pill fs-6 px-3">
+                                                <span class="badge bg-danger rounded-pill fs-6 px-3 shadow-sm">
                                                     -<?= $rk['jumlah_pakai'] ?>
                                                 </span>
-                                                <div class="mt-1 d-flex align-items-center justify-content-end gap-2">
-                                                    <small class="text-success fw-semibold"><i class="fa-solid fa-circle-check"></i> Tercatat</small>
-                                                    <a href="#" class="btn-hapus" data-href="proses_hapus.php?jenis=pemakaian&id=<?= $rk['id'] ?>">
-                                                        <i class="fa-solid fa-trash text-danger"></i>
+                                                <div class="mt-2 d-flex align-items-center justify-content-end gap-3">
+                                                    <?php if($rk['status'] === 'Pending'): ?>
+                                                        <a href="proses_selesai.php?id=<?= $rk['id'] ?>" title="Tandai Selesai" class="text-success fs-5">
+                                                            <i class="fa-solid fa-check-circle"></i>
+                                                        </a>
+                                                    <?php endif; ?>
+                                                    <a href="#" class="btn-hapus text-danger fs-5" data-href="proses_hapus.php?jenis=pemakaian&id=<?= $rk['id'] ?>" title="Hapus">
+                                                        <i class="fa-solid fa-trash"></i>
                                                     </a>
                                                 </div>
                                             </div>
