@@ -24,6 +24,7 @@ Aplikasi web interaktif untuk melacak, memonitor, dan mengelola kupon makan RFID
 [📁 Struktur](#-struktur-folder) •
 [💡 Logika FEFO](#-logika-sistem-fefo) •
 [⚙️ Instalasi](#️-panduan-instalasi) •
+[🔑 Akun Default](#-akun-default-untuk-pengujian) •
 [🚀 Cara Pakai](#-cara-menggunakan) •
 [🖼️ Preview](#️-preview-aplikasi)
 
@@ -83,7 +84,7 @@ Aplikasi ini telah melalui proses *Security Hardening* yang ketat:
 1. **Anti-SQL Injection (100% Prepared Statements)**: Seluruh interaksi database yang menerima input pengguna atau session menggunakan `mysqli::prepare` dan `bind_param`.
 2. **Perlindungan CSRF (Cross-Site Request Forgery)**: Helper `csrf.php` menghasilkan token kriptografis 64-karakter hex. Seluruh aksi manipulasi data (`POST`) wajib membawa token valid yang diverifikasi menggunakan perbandingan timing-safe (`hash_equals`).
 3. **Konversi Aksi Berbahaya ke POST**: Tidak ada lagi aksi state-changing (hapus, reset password, tandai selesai) yang bisa dieksekusi murni via link GET.
-4. **Rate Limiting Login**: Menghindari serangan *brute-force* password menggunakan kombinasi hash `NIM + IP Address`. Gagal login $\ge 5$ kali dalam 15 menit akan diblokir sementara.
+4. **Rate Limiting Login**: Menghindari serangan *brute-force* password menggunakan kombinasi hash `NIM + IP Address`. Gagal login ≥ 5 kali dalam 15 menit akan diblokir sementara.
 5. **Session Hardening**: `session_config.php` menerapkan flag cookie `HttpOnly`, `SameSite=Lax`, dan `Secure`. Terdapat `session_regenerate_id(true)` saat login sukses untuk mencegah *Session Fixation*.
 6. **Kebijakan Password Wajib**: Password baru minimal 8 karakter (kombinasi huruf dan angka). Akun baru & hasil reset wajib memperbarui password saat pertama kali login (`must_change_password`).
 7. **Proteksi Server Apache (`.htaccess`)**: Mencegah *directory browsing*, memblokir akses langsung ke file konfigurasi (`config.php`), folder `database/`, folder `.git/`, dan ekstensi `.sql`, `.env`, `.md`, `.log`.
@@ -166,8 +167,8 @@ Aplikasi ini mengimplementasikan algoritma **First-Expired, First-Out (FEFO)**:
 >
 > **Hasil Eksekusi FEFO:**
 > 1. Sistem mengurutkan batch kupon berdasarkan `tanggal_expired ASC`.
-> 2. Batch Agustus (10 kupon) dipotong habis $\rightarrow$ sisa = **0**.
-> 3. Sisa kebutuhan (5 kupon) dipotong dari batch September $\rightarrow$ sisa = **15**.
+> 2. Batch Agustus (10 kupon) dipotong habis → sisa = **0**.
+> 3. Sisa kebutuhan (5 kupon) dipotong dari batch September → sisa = **15**.
 > - Kupon yang hampir hangus selalu aman terpakai lebih dulu! ✅
 
 ---
@@ -175,18 +176,24 @@ Aplikasi ini mengimplementasikan algoritma **First-Expired, First-Out (FEFO)**:
 ## ⚙️ Panduan Instalasi
 
 ### 1️⃣ Clone Repository
+
 Buka terminal di direktori web root Anda (`C:\laragon\www\` atau `C:\xampp\htdocs\`):
+
 ```bash
 git clone https://github.com/<username>/Coupon-Tracker.git
 cd Coupon-Tracker
 ```
 
 ### 2️⃣ Konfigurasi Database Kredensial
+
 Salin file template konfigurasi menjadi `config.php`:
+
 ```bash
 cp config.example.php config.php
 ```
+
 Buka `config.php` dan sesuaikan dengan pengaturan MySQL lokal Anda:
+
 ```php
 return [
     'host'     => 'localhost',
@@ -197,13 +204,17 @@ return [
 ```
 
 ### 3️⃣ Import Skema Database
+
 Import file `database/schema.sql` ke MySQL melalui phpMyAdmin atau terminal CLI:
+
 ```bash
 mysql -u root -p < database/schema.sql
 ```
 
 ### 4️⃣ Jalankan Aplikasi! 🎉
+
 Buka browser dan akses URL:
+
 👉 `http://localhost/Coupon-Tracker/`
 
 ---
@@ -230,6 +241,47 @@ Database seeder `schema.sql` menyediakan beberapa akun pengujian fiktif:
 3. Setiap kali makan di kantin, catat pada form **Catat Pemakaian Kupon**, pilih status (*Selesai* atau *Pending* jika direncanakan untuk besok).
 4. Pantau tren pengeluaran Anda melalui kartu **Insight** bulanan.
 5. Anda dapat menandai kupon *Pending* menjadi *Selesai* dengan mengklik ikon centang hijau di riwayat pemakaian.
+
+---
+
+## 🖼️ Preview Aplikasi
+
+> **Note:** Simpan screenshot aplikasi ke folder `/assets/img/` di repo Anda agar gambar di bawah ini muncul.
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/img/Phone.png" alt="Login Page" width="28%">
+      <br>
+      <b>🔐 Halaman Login</b>
+      <br>
+      <sub>Akses masuk aman menggunakan NIM/NIP & Password.</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/img/Laptop.png" alt="Dashboard Page" width="100%">
+      <br>
+      <b>🖥️ Dashboard Desktop</b>
+      <br>
+      <sub>Ringkasan kupon, insight tren bulanan, dan riwayat pemakaian.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/img/Tablets.png" alt="Profile Page" width="42%">
+      <br>
+      <b>👤 Halaman Profil</b>
+      <br>
+      <sub>Manajemen profil diri dan ganti kata sandi.</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/img/Desktop.png" alt="Admin Panel View" width="100%">
+      <br>
+      <b>👑 Panel Admin & Monitoring</b>
+      <br>
+      <sub>Statistik kupon global dan kelola pengguna via tampilan desktop.</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
