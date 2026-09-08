@@ -123,7 +123,7 @@ if ($result && $result->num_rows > 0) {
                                             <?php else: ?>
                                                 <span class="badge bg-secondary opacity-75 mb-1 px-3 py-2"><i class="fa-solid fa-user-graduate"></i> Mahasiswa</span>
                                             <?php endif; ?>
-                                            <div class="small text-muted fw-bold">NIM: <?= htmlspecialchars($rg['nim']) ?></div>
+                                            <div class="small text-muted fw-bold"><?= ($rg['status_pekerjaan'] === 'Karyawan') ? 'NIP' : 'NIM' ?>: <?= htmlspecialchars($rg['nim']) ?></div>
                                         </div>
                                     </div>
                                 </div>

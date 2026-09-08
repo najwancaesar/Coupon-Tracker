@@ -163,7 +163,7 @@ if ($stmt) {
                         <!-- Informasi Pribadi -->
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <div class="info-label"><i class="fa-solid fa-id-card me-1"></i> NIM</div>
+                                <div class="info-label"><i class="fa-solid fa-id-card me-1"></i> <?= ($status_pekerjaan === 'Karyawan') ? 'NIP' : 'NIM' ?></div>
                                 <div class="info-value text-primary fs-5"><?= htmlspecialchars($nim) ?></div>
                             </div>
                             <div class="col-md-6">

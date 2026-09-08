@@ -25,6 +25,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         exit();
     }
+    // 1.5. Validasi password baru tidak boleh sama dengan password lama
+    if ($password_lama === $password_baru) {
+        $_SESSION['error'] = 'Password baru tidak boleh sama dengan password lama! Silakan gunakan password yang berbeda untuk keamanan.';
+        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+            header("Location: admin_profile.php");
+        } else {
+            header("Location: profile.php");
+        }
+        exit();
+    }
 
     // 2. Tarik password lama user (yang dienkripsi) dari database
     $query = "SELECT password FROM users WHERE id = ?";

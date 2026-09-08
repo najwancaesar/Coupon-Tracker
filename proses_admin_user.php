@@ -16,10 +16,10 @@ if ($aksi === 'tambah') {
     $nama_lengkap = $_POST['nama_lengkap'];
     $status_pekerjaan = $_POST['status_pekerjaan'];
     
-    // Cek apakah NIM atau Username sudah digunakan
-    $cek = $mysqli->query("SELECT id FROM users WHERE nim = '$nim' OR username = '$username'");
+    // Cek apakah NIM, Username, atau Nama Lengkap sudah digunakan
+    $cek = $mysqli->query("SELECT id FROM users WHERE nim = '$nim' OR username = '$username' OR nama_lengkap = '$nama_lengkap'");
     if ($cek && $cek->num_rows > 0) {
-        $_SESSION['error'] = 'NIM atau Username sudah terdaftar di sistem!';
+        $_SESSION['error'] = 'Gagal Menambah User! NIM/NIP, Username, atau Nama Lengkap tersebut sudah terdaftar di sistem. Silakan gunakan data yang lain.';
         header("Location: admin_dashboard.php");
         exit();
     }
