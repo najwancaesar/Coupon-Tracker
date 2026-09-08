@@ -13,17 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tanggal_pakai = $_POST['tanggal_pakai'];
     $jumlah_pakai = (int)$_POST['jumlah_pakai'];
     $keterangan = $_POST['keterangan'];
-    
-    $hari_ini = date('Y-m-d');
-
-    // Validasi Tanggal: Tanggal pemakaian tidak boleh lebih dari hari ini
-    if ($tanggal_pakai > $hari_ini) {
-        $_SESSION['error'] = 'Tanggal pemakaian tidak boleh lebih dari hari ini!';
-        $_SESSION['pesan'] = 'Tanggal pemakaian tidak boleh lebih dari hari ini!';
-        $_SESSION['tipe_pesan'] = 'danger';
-        header("Location: dashboard.php");
-        exit();
-    }
+    $status = $_POST['status'];
 
     // 1. Cek Ketersediaan Sisa Kupon yang Belum Expired
     $total_sisa_kupon = 0;
@@ -41,8 +31,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Jika saldo tidak mencukupi, tolak
     if ($total_sisa_kupon < $jumlah_pakai) {
-        $_SESSION['error'] = 'Sisa kupon tidak mencukupi!';
-        $_SESSION['pesan'] = 'Sisa kupon tidak mencukupi!';
+        $_SESSION['error'] = 'Gagal! Sisa kupon Anda tidak mencukupi untuk transaksi ini.';
+        $_SESSION['pesan'] = 'Gagal! Sisa kupon Anda tidak mencukupi untuk transaksi ini.';
         $_SESSION['tipe_pesan'] = 'danger';
         header("Location: dashboard.php");
         exit();
@@ -95,9 +85,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             
             // 3. Catat Riwayat Pemakaian
-            $query_insert = "INSERT INTO riwayat_kupon (user_id, tanggal_pakai, jumlah_pakai, keterangan) VALUES (?, ?, ?, ?)";
+            $query_insert = "INSERT INTO riwayat_kupon (user_id, tanggal_pakai, jumlah_pakai, keterangan, status) VALUES (?, ?, ?, ?, ?)";
             $stmt_insert = $mysqli->prepare($query_insert);
-            $stmt_insert->bind_param("isis", $user_id, $tanggal_pakai, $jumlah_pakai, $keterangan);
+            $stmt_insert->bind_param("isiss", $user_id, $tanggal_pakai, $jumlah_pakai, $keterangan, $status);
             $stmt_insert->execute();
             $stmt_insert->close();
             
