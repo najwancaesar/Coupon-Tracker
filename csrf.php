@@ -12,23 +12,20 @@
  *
  * @return string Token CSRF yang valid untuk sesi ini
  */
-function generate_csrf_token(): string {
-    if (empty($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+if (!function_exists('generate_csrf_token')) {
+    function generate_csrf_token(): string {
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
     }
-    return $_SESSION['csrf_token'];
 }
 
-/**
- * Verifikasi token CSRF dari input dengan token yang tersimpan di session.
- * Gunakan perbandingan timing-safe untuk mencegah timing attack.
- *
- * @param string $token Token dari input form ($_POST['csrf_token'])
- * @return bool True jika valid, false jika tidak
- */
-function verify_csrf_token(string $token): bool {
-    if (empty($_SESSION['csrf_token']) || empty($token)) {
-        return false;
+if (!function_exists('verify_csrf_token')) {
+    function verify_csrf_token(string $token): bool {
+        if (empty($_SESSION['csrf_token']) || empty($token)) {
+            return false;
+        }
+        return hash_equals($_SESSION['csrf_token'], $token);
     }
-    return hash_equals($_SESSION['csrf_token'], $token);
 }

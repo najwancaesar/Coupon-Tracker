@@ -1,0 +1,13 @@
+# Database configuration & credentials (DO NOT COMMIT)
+config.php
+.env
+
+# Dependencies & packages
+/vendor/
+
+# Logs & temporary files
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db

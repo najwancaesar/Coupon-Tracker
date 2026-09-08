@@ -1,0 +1,18 @@
+# Disable directory browsing
+Options -Indexes
+
+# Block direct web access to sensitive files
+<FilesMatch "\.(sql|md|env|log)$">
+    Require all denied
+</FilesMatch>
+
+# Block access to config.php directly from browser
+<Files "config.php">
+    Require all denied
+</Files>
+
+# Block access to database/ and .git/ directories
+<IfModule mod_alias.c>
+    RedirectMatch 403 ^/database/.*$
+    RedirectMatch 403 ^/\.git/.*$
+</IfModule>
