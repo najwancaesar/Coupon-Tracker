@@ -102,6 +102,11 @@ if ($result && $result->num_rows > 0) {
                                         <!-- Konten -->
                                         <div class="flex-grow-1 overflow-hidden">
                                             <div class="fw-bold text-dark fs-5 mb-1 searchable-text">
+                                                <?php if($rg['status_pekerjaan'] == 'Karyawan'): ?>
+                                                    <i class="fa-solid fa-briefcase text-primary me-2" title="Karyawan"></i>
+                                                <?php else: ?>
+                                                    <i class="fa-solid fa-graduation-cap text-success me-2" title="Mahasiswa"></i>
+                                                <?php endif; ?>
                                                 <?= htmlspecialchars($rg['nama_lengkap']) ?>
                                             </div>
                                             <p class="text-muted mb-0 lh-lg">
