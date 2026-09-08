@@ -274,7 +274,7 @@ Database seeder `schema.sql` menyediakan beberapa akun pengujian fiktif:
       <sub>Manajemen profil diri dan ganti kata sandi.</sub>
     </td>
     <td align="center" width="50%">
-      <img src="assets/img/Desktop.png" alt="Admin Panel View" width="100%">
+      <img src="assets/img/RealDesktop.png" alt="Admin Panel View" width="100%">
       <br>
       <b>👑 Panel Admin & Monitoring</b>
       <br>
